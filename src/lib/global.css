@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+	color-scheme: light dark;
+}
+
+@theme {
+	--font-roboto-serif: "Roboto Serif", serif;
+	--color-body-text: light-dark(#333, #eee);
+	--color-body-bg: light-dark(#fff, #222);
+}
+
+body {
+	@apply font-roboto-serif text-body-text bg-body-bg;
+}
