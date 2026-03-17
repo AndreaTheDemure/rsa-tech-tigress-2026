@@ -17,3 +17,38 @@
 </svelte:head>
 
 {@render children()}
+
+<script>
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+</script>
+
+<style>
+  nav {
+    display: flex;
+    gap: 20px;
+    background: #333;
+    color: white;
+    padding: 10px;
+  }
+  nav a {
+    color: white;
+    text-decoration: none;
+  }
+  nav a.active {
+    text-decoration: underline;
+  }
+  main {
+    padding: 20px;
+  }
+</style>
+
+<nav>
+  <a href="/" class:active={$page.url.pathname === '/'}>Home</a>
+  <a href="/goals" class:active={$page.url.pathname === '/goals'}>Goals</a>
+  <a href="/health" class:active={$page.url.pathname === '/health'}>Health</a>
+</nav>
+
+<main>
+  <slot />
+</main>
