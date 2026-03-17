@@ -1,74 +1,132 @@
 <script>
     import { onMount } from 'svelte';
-    import { hydrationHistory, moodHistory, addWater, recordMood, healthReminders } from '$lib/stores/health';
+    import { meals, exercises, addMeal, addExercise, weeklyProgress, points, badges, dailyReminders, scheduleDailyNotifications } from '$lib/stores/health.js';
 
-    let waterGoal = 8; 
-    let currentWaterIntake = 0;
+    // Meal log inputs
+    let mealName = '';
+    let myPlate = { fruits: false, veggies: false, grains: false, protein: false, dairy: false };
 
-    $: today = new Date().toISOString().split('T')[0];
-
-    // Load today's hydration
-    $: currentWaterIntake = $hydrationHistory.find(h => h.date === today)?.intake || 0;
-
-    function drinkWater() {
-        addWater();
+    function submitMeal() {
+        if (!mealName) return;
+        addMeal(mealName, { ...myPlate });
+        mealName = '';
+        myPlate = { fruits: false, veggies: false, grains: false, protein: false, dairy: false };
     }
 
-    // Mood tracking
-    const moods = ['😄 Happy', '😐 Neutral', '😔 Sad', '😰 Anxious', '😡 Angry'];
-    let selectedMood = '';
+    // Exercise log inputs
+    let exerciseType = '';
+    let duration = '';
+    let intensity = 'Medium';
 
-    function saveMood() {
-        if (!selectedMood) return;
-        recordMood(selectedMood);
-        alert('Mood recorded!');
+    function submitExercise() {
+        if (!exerciseType || !duration) return;
+        addExercise(exerciseType, duration, intensity);
+        exerciseType = '';
+        duration = '';
+        intensity = 'Medium';
     }
 
-    // Daily reminders
+    const foodEmojis = { fruits: '🍎', veggies: '🥦', grains: '🍞', protein: '🥩', dairy: '🥛' };
+    const today = new Date().toISOString().split('T')[0];
+
+    // Upcoming reminders for today
+    let upcomingReminders = [];
     onMount(() => {
         if (Notification.permission !== 'granted') {
-            Notification.requestPermission();
-        }
+            Notification.requestPermission().then(p => { if(p==='granted') scheduleDailyNotifications(); });
+        } else scheduleDailyNotifications();
 
-        $healthReminders.forEach(reminder => {
+        dailyReminders.subscribe(reminders => {
             const now = new Date();
-            const [hours, minutes] = reminder.time.split(':').map(Number);
-            const reminderTime = new Date();
-            reminderTime.setHours(hours, minutes, 0, 0);
-
-            const delay = reminderTime.getTime() - now.getTime();
-            if (delay > 0) {
-                setTimeout(() => {
-                    if (Notification.permission === 'granted') {
-                        const message = reminder.type === 'water' 
-                            ? 'Time to drink a glass of water!' 
-                            : 'How are you feeling? Check your mood.';
-                        new Notification('Health Reminder', { body: message });
-                    }
-                }, delay);
-            }
+            upcomingReminders = reminders.filter(r => {
+                const [hours, minutes] = r.time.split(':').map(Number);
+                const reminderTime = new Date();
+                reminderTime.setHours(hours, minutes, 0, 0);
+                return reminderTime >= now;
+            });
         });
     });
 </script>
 
-<h1>Health & Well-Being</h1>
+<h1>Health & Gamified Tracker 🍽️🏃‍♂️</h1>
 
 <section>
-    <h2>Hydration Tracker 💧</h2>
-    <p>Glasses consumed: {currentWaterIntake} / {waterGoal}</p>
-    <button on:click={drinkWater}>Add a glass</button>
-</section>
-
-<section>
-    <h2>Mood Tracker 🙂</h2>
-    <select bind:value={selectedMood}>
-        <option value="" disabled>Select your mood</option>
-        {#each moods as mood}
-            <option value={mood}>{mood}</option>
+    <h2>Log a Meal</h2>
+    <input placeholder="Meal Name" bind:value={mealName} />
+    <div class="myplate">
+        {#each Object.keys(myPlate) as key}
+            <label><input type="checkbox" bind:checked={myPlate[key]} /> {foodEmojis[key]} {key}</label>
         {/each}
-    </select>
-    <button on:click={saveMood}>Record Mood</button>
-    {#if selectedMood}
-        <p>Your mood today: {selectedMood}</p>
-    {/if}
+    </div>
+    <button on:click={submitMeal}>Add Meal</button>
 </section>
+
+<section>
+    <h2>Log Exercise</h2>
+    <input placeholder="Exercise Type" bind:value={exerciseType} />
+    <input type="number" placeholder="Duration (min)" bind:value={duration} />
+    <select bind:value={intensity}>
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+    <button on:click={submitExercise}>Add Exercise</button>
+</section>
+
+<section>
+    <h2>Today's Meals 🍽️</h2>
+    <ul>
+        {#each $meals.filter(m => m.date === today) as meal}
+            <li>
+                <strong>{meal.name}</strong> - 
+                {#each Object.keys(meal.myPlate) as key}{#if meal.myPlate[key]}{foodEmojis[key]}{/if}{/each}
+            </li>
+        {/each}
+    </ul>
+</section>
+
+<section>
+    <h2>Today's Exercises 🏃‍♂️</h2>
+    <ul>
+        {#each $exercises.filter(e => e.date === today) as ex}
+            <li>{ex.type} - {ex.duration} min ({ex.intensity})</li>
+        {/each}
+    </ul>
+</section>
+
+<section>
+    <h2>Weekly Goals 🎯</h2>
+    <ul>
+        {#each $weeklyProgress as goal}
+            <li>
+                {goal.description}: {goal.progress}/{goal.target} 
+                <span class="status">{goal.achieved ? '✅' : '❌'}</span>
+                <div class="progress-bar">
+                    <div class="fill" style="width: {Math.min(goal.progress / goal.target * 100, 100)}%"></div>
+                </div>
+            </li>
+        {/each}
+    </ul>
+    <p>Points Earned: {$points}</p>
+    {#if $badges.length}<p>Badges: {$badges.join(', ')}</p>{/if}
+</section>
+
+<section>
+    <h2>Upcoming Reminders ⏰</h2>
+    <ul>
+        {#each upcomingReminders as r}
+            <li>{r.type.toUpperCase()}: {r.message} at {r.time}</li>
+        {/each}
+    </ul>
+</section>
+
+<style>
+section { border: 1px solid #ddd; padding: 16px; margin-bottom: 16px; border-radius: 10px; }
+.myplate { display: flex; gap: 10px; margin: 8px 0; }
+.myplate label { display: flex; align-items: center; gap: 4px; }
+button { margin-top: 8px; background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+button:hover { background: #fb8c00; }
+.progress-bar { background: #eee; height: 12px; border-radius: 6px; margin: 4px 0; }
+.fill { background: #4caf50; height: 100%; border-radius: 6px; }
+.status { font-weight: bold; margin-left: 4px; }
+</style>
