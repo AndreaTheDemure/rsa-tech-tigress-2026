@@ -2,12 +2,12 @@
 	"name": "RSA App",
 	"icons": [
 		{
-			"src": "/icons/pornhub-logo-192.png",
+			"src": "/icons/app-logo-192.png",
 			"type": "image/png",
 			"sizes": "192x192"
 		},
 		{
-			"src": "/icons/pornhub-logo-512.png",
+			"src": "/icons/app-logo-512.png",
 			"type": "image/png",
 			"sizes": "512x512"
 		}
