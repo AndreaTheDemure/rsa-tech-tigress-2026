@@ -8,8 +8,40 @@
 	--font-roboto-serif: "Roboto Serif", serif;
 	--color-body-text: light-dark(#333, #eee);
 	--color-body-bg: light-dark(#fff, #222);
+	--color-t-pink: #f2cde1;
+	--color-t-green: #cae1b8;
 }
-
+@theme {
+	/** palette generated online */
+	--color-t-pink-50: oklch(0.967 0.013 345.66);
+	--color-t-pink-100: oklch(0.942 0.024 343.04);
+	--color-t-pink-200: oklch(0.885 0.049 344.45);
+	--color-t-pink-300: oklch(0.796 0.095 344.58);
+	--color-t-pink-400: oklch(0.709 0.149 344.68);
+	--color-t-pink-500: oklch(0.627 0.18 344.26);
+	--color-t-pink-600: oklch(0.529 0.152 344.58);
+	--color-t-pink-700: oklch(0.43 0.124 344.2);
+	--color-t-pink-800: oklch(0.331 0.096 344.77);
+	--color-t-pink-900: oklch(0.241 0.07 343.33);
+	--color-t-pink-950: oklch(0.184 0.053 344.63);
+	--color-t-green-50: oklch(0.97 0.014 128.5);
+	--color-t-green-100: oklch(0.94 0.031 131.5);
+	--color-t-green-200: oklch(0.882 0.06 131.48);
+	--color-t-green-300: oklch(0.823 0.093 131.77);
+	--color-t-green-400: oklch(0.762 0.121 132.53);
+	--color-t-green-500: oklch(0.704 0.148 133.46);
+	--color-t-green-600: oklch(0.598 0.123 133.31);
+	--color-t-green-700: oklch(0.489 0.1 133.1);
+	--color-t-green-800: oklch(0.371 0.072 133.42);
+	--color-t-green-900: oklch(0.243 0.041 133.02);
+	--color-t-green-950: oklch(0.172 0.022 133.19);
+}
 body {
 	@apply font-roboto-serif text-body-text bg-body-bg;
+}
+
+@custom-variant light {
+	@media (prefers-color-scheme: light) {
+		@slot;
+	}
 }
