@@ -9,10 +9,10 @@
 
 <style>
 	svelte-css-wrapper :global {
-		*[fill="#ff0000"] {
+		path[fill] {
 			fill: var(--fill-color);
 		}
-		*[stroke="#ff0000"] {
+		path[stroke] {
 			stroke: var(--fill-color);
 		}
 	}
