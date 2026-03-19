@@ -10,6 +10,7 @@
 	--color-body-bg: light-dark(#fff, #222);
 	--color-t-pink: #f2cde1;
 	--color-t-green: #cae1b8;
+	--text-tiny: 0.525rem;
 }
 @theme {
 	/** palette generated online */
@@ -45,3 +46,4 @@ body {
 		@slot;
 	}
 }
+@custom-variant marked-invalid (&[data-show-invalid="true"]);
